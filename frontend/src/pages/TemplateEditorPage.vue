@@ -26,13 +26,11 @@ const form = reactive({
   description: '',
   width: 1,
   height: 1,
+  gridCols: 100,
+  gridRows: 100,
   widgets: [] as Widget[],
 })
 
-// Fixed grid-line overlay density for the editor canvas: widgets are
-// positioned/sized as percentages, so a 10x10 overlay marks 10% increments
-// regardless of the canvas's pixel dimensions.
-const gridOverlayLines = 10
 
 const loading = ref(false)
 const saving = ref(false)
@@ -135,6 +133,11 @@ const aspectRatio = computed(() => {
 
 const canvasRatio = computed(() => 1 / aspectRatio.value)
 
+function pctToCol(pct: number) { return Math.round(pct * form.gridCols / 100) }
+function pctToRow(pct: number) { return Math.round(pct * form.gridRows / 100) }
+function colToPct(col: number) { return Math.round(col / form.gridCols * 100) }
+function rowToPct(row: number) { return Math.round(row / form.gridRows * 100) }
+
 function clampRatio(v: number): number {
   return Math.min(999, Math.max(1, Math.round(v) || 1))
 }
@@ -151,11 +154,17 @@ function recomputeCellHeight() {
   if (!grid) return
   const cellWidthPx = grid.cellWidth()
   if (!cellWidthPx) return
-  grid.cellHeight(cellWidthPx * aspectRatio.value)
+  grid.cellHeight(cellWidthPx * form.gridCols * aspectRatio.value / form.gridRows)
 }
 
 watch([() => form.width, () => form.height], () => {
   nextTick(() => recomputeCellHeight())
+})
+
+watch([() => form.gridCols, () => form.gridRows], async () => {
+  if (grid) { grid.destroy(false); grid = null }
+  await nextTick()
+  initGrid()
 })
 
 onMounted(async () => {
@@ -168,6 +177,8 @@ onMounted(async () => {
       form.description = t.description
       form.width = t.width
       form.height = t.height
+      form.gridCols = t.gridCols || 100
+      form.gridRows = t.gridRows || 100
       form.widgets = t.widgets.map((w) => ({ ...w }))
     } catch (err) {
       error.value = apiErrorMessage(err, 'Failed to load template')
@@ -190,8 +201,8 @@ function initGrid() {
   if (!gridEl.value || grid) return
   grid = GridStack.init(
     {
-      column: 100,
-      maxRow: 100,
+      column: form.gridCols,
+      maxRow: form.gridRows,
       cellHeight: 1,
       margin: 2,
       float: true,
@@ -212,10 +223,10 @@ function applyLayoutChange(items: GridStackNode[]) {
     if (!item.id) continue
     const widget = form.widgets.find((w) => w.id === item.id)
     if (!widget) continue
-    if (item.x != null) widget.x = item.x
-    if (item.y != null) widget.y = item.y
-    if (item.w != null) widget.w = item.w
-    if (item.h != null) widget.h = item.h
+    if (item.x != null) widget.x = colToPct(item.x)
+    if (item.y != null) widget.y = rowToPct(item.y)
+    if (item.w != null) widget.w = colToPct(item.w)
+    if (item.h != null) widget.h = rowToPct(item.h)
   }
 }
 
@@ -311,10 +322,10 @@ function updateSize(dim: 'w' | 'h', value: number) {
   const el = itemRefs.get(widget.id)
   if (dim === 'w') {
     widget.w = clamped
-    if (el && grid) grid.update(el, { w: clamped })
+    if (el && grid) grid.update(el, { w: Math.max(1, pctToCol(clamped)) })
   } else {
     widget.h = clamped
-    if (el && grid) grid.update(el, { h: clamped })
+    if (el && grid) grid.update(el, { h: Math.max(1, pctToRow(clamped)) })
   }
 }
 
@@ -322,6 +333,9 @@ function validate(): string | null {
   if (!form.name.trim()) return 'Template name is required.'
   if (form.width < 1 || form.width > 10000 || form.height < 1 || form.height > 10000) {
     return 'Canvas size must be between 1 and 10000 pixels.'
+  }
+  if (form.gridCols < 1 || form.gridCols > 1000 || form.gridRows < 1 || form.gridRows > 1000) {
+    return 'Grid constraints must be between 1 and 1000.'
   }
   if (!form.widgets.length) return 'Add at least one widget.'
   for (const w of form.widgets) {
@@ -346,6 +360,8 @@ async function save() {
       description: form.description.trim(),
       width: form.width,
       height: form.height,
+      gridCols: form.gridCols,
+      gridRows: form.gridRows,
       widgets: form.widgets,
     }
     if (isEdit.value && props.id) {
@@ -429,6 +445,31 @@ async function save() {
                 <p class="form-text small text-muted mb-0">
                   Width : height ratio of the output canvas, e.g. 16 : 9.
                   The editor board always displays as a square.
+                </p>
+              </div>
+              <div class="mt-3">
+                <label class="form-label mb-1">Grid constraints</label>
+                <div class="d-flex align-items-center gap-2">
+                  <input
+                    v-model.number="form.gridCols"
+                    type="number"
+                    min="1"
+                    max="1000"
+                    class="form-control form-control-sm"
+                    style="width: 4rem"
+                  />
+                  <span class="text-muted">×</span>
+                  <input
+                    v-model.number="form.gridRows"
+                    type="number"
+                    min="1"
+                    max="1000"
+                    class="form-control form-control-sm"
+                    style="width: 4rem"
+                  />
+                </div>
+                <p class="form-text small text-muted mb-0">
+                  Snap columns × rows. Higher = finer precision.
                 </p>
               </div>
             </div>
@@ -596,8 +637,8 @@ async function save() {
                 class="template-canvas"
                 :style="{
                   aspectRatio: `${form.width} / ${form.height}`,
-                  '--board-cols': gridOverlayLines,
-                  '--board-rows': gridOverlayLines,
+                  '--board-cols': form.gridCols,
+                  '--board-rows': form.gridRows,
                   '--canvas-ratio': canvasRatio,
                 }"
               >
@@ -607,10 +648,10 @@ async function save() {
                     :key="w.id"
                     class="grid-stack-item"
                     :gs-id="w.id"
-                    :gs-x="w.x >= 0 ? w.x : undefined"
-                    :gs-y="w.y >= 0 ? w.y : undefined"
-                    :gs-w="w.w"
-                    :gs-h="w.h"
+                    :gs-x="w.x >= 0 ? pctToCol(w.x) : undefined"
+                    :gs-y="w.y >= 0 ? pctToRow(w.y) : undefined"
+                    :gs-w="Math.max(1, pctToCol(w.w))"
+                    :gs-h="Math.max(1, pctToRow(w.h))"
                     :ref="(el) => setItemRef(w.id, el)"
                   >
                     <div class="grid-stack-item-content">

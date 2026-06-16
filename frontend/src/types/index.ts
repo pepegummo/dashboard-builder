@@ -50,6 +50,8 @@ export interface Template {
   description: string
   width: number // canvas width in pixels, e.g. 1920
   height: number // canvas height in pixels, e.g. 1080
+  gridCols: number // editor snap columns (default 100)
+  gridRows: number // editor snap rows (default 100)
   widgets: Widget[]
   createdAt: string
   updatedAt: string
@@ -61,6 +63,8 @@ export interface TemplateInput {
   description: string
   width: number
   height: number
+  gridCols: number
+  gridRows: number
   widgets: Widget[]
 }
 

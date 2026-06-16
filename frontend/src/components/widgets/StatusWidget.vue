@@ -10,7 +10,7 @@ const props = defineProps<{
 
 /* Computed style object for the status badge — evaluated once per render */
 const statusStyle = computed(() => {
-  const v = (props.value as string | undefined)?.toLowerCase() ?? ''
+  const v = typeof props.value === 'string' ? props.value.toLowerCase() : ''
   let bg = '#64748b'
   if (v === 'running') bg = 'var(--db-success)'
   else if (v === 'stopped' || v === 'error') bg = 'var(--db-danger)'

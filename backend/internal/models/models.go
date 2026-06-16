@@ -55,8 +55,10 @@ type Template struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	Width       int       `json:"width"`  // canvas width in pixels, e.g. 1920
-	Height      int       `json:"height"` // canvas height in pixels, e.g. 1080
+	Width       int       `json:"width"`    // canvas width in pixels, e.g. 1920
+	Height      int       `json:"height"`   // canvas height in pixels, e.g. 1080
+	GridCols    int       `json:"gridCols"` // editor snap columns (default 100)
+	GridRows    int       `json:"gridRows"` // editor snap rows (default 100)
 	Widgets     []Widget  `json:"widgets"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`

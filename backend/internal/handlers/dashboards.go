@@ -80,7 +80,7 @@ func (h *DashboardHandler) Get(w http.ResponseWriter, r *http.Request) {
 	d.CreatedAt, _ = time.Parse(time.RFC3339, createdAt)
 	d.UpdatedAt, _ = time.Parse(time.RFC3339, updatedAt)
 
-	tplRow := h.DB.QueryRow(`SELECT id, name, description, width, height, widgets_json, created_at, updated_at FROM templates WHERE id = ?`, d.TemplateID)
+	tplRow := h.DB.QueryRow(`SELECT id, name, description, width, height, grid_cols, grid_rows, widgets_json, created_at, updated_at FROM templates WHERE id = ?`, d.TemplateID)
 	tpl, err := scanTemplate(tplRow)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "load template: "+err.Error())

@@ -54,6 +54,8 @@ func migrate(conn *sql.DB) error {
 	for _, a := range []struct{ column, ddl string }{
 		{"width", "width INTEGER NOT NULL DEFAULT 1920"},
 		{"height", "height INTEGER NOT NULL DEFAULT 1080"},
+		{"grid_cols", "grid_cols INTEGER NOT NULL DEFAULT 100"},
+		{"grid_rows", "grid_rows INTEGER NOT NULL DEFAULT 100"},
 	} {
 		if err := addColumnIfNotExists(conn, "templates", a.column, a.ddl); err != nil {
 			return err

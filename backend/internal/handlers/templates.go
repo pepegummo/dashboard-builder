@@ -48,7 +48,7 @@ func (h *TemplateHandler) Metrics(w http.ResponseWriter, r *http.Request) {
 
 // List returns every saved template (without widget detail) for picker UIs.
 func (h *TemplateHandler) List(w http.ResponseWriter, r *http.Request) {
-	rows, err := h.DB.Query(`SELECT id, name, description, width, height, widgets_json, created_at, updated_at FROM templates ORDER BY name`)
+	rows, err := h.DB.Query(`SELECT id, name, description, width, height, grid_cols, grid_rows, widgets_json, created_at, updated_at FROM templates ORDER BY name`)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -69,7 +69,7 @@ func (h *TemplateHandler) List(w http.ResponseWriter, r *http.Request) {
 
 func (h *TemplateHandler) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	row := h.DB.QueryRow(`SELECT id, name, description, width, height, widgets_json, created_at, updated_at FROM templates WHERE id = ?`, id)
+	row := h.DB.QueryRow(`SELECT id, name, description, width, height, grid_cols, grid_rows, widgets_json, created_at, updated_at FROM templates WHERE id = ?`, id)
 	t, err := scanTemplate(row)
 	if errors.Is(err, sql.ErrNoRows) {
 		writeError(w, http.StatusNotFound, "template not found")
@@ -87,6 +87,8 @@ type templateInput struct {
 	Description string          `json:"description"`
 	Width       int             `json:"width"`
 	Height      int             `json:"height"`
+	GridCols    int             `json:"gridCols"`
+	GridRows    int             `json:"gridRows"`
 	Widgets     []models.Widget `json:"widgets"`
 }
 
@@ -103,6 +105,15 @@ func (in *templateInput) validate() error {
 	}
 	if in.Width < minCanvasSize || in.Width > maxCanvasSize || in.Height < minCanvasSize || in.Height > maxCanvasSize {
 		return errors.New("template canvas size must be between 1 and 10000 pixels")
+	}
+	if in.GridCols == 0 {
+		in.GridCols = 100
+	}
+	if in.GridRows == 0 {
+		in.GridRows = 100
+	}
+	if in.GridCols < 1 || in.GridCols > 1000 || in.GridRows < 1 || in.GridRows > 1000 {
+		return errors.New("grid constraints must be between 1 and 1000")
 	}
 
 	if len(in.Widgets) == 0 {
@@ -165,13 +176,15 @@ func (h *TemplateHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Description: in.Description,
 		Width:       in.Width,
 		Height:      in.Height,
+		GridCols:    in.GridCols,
+		GridRows:    in.GridRows,
 		Widgets:     in.Widgets,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
 
-	_, err = h.DB.Exec(`INSERT INTO templates (id, name, description, width, height, widgets_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		t.ID, t.Name, t.Description, t.Width, t.Height, string(widgetsJSON), t.CreatedAt.Format(time.RFC3339), t.UpdatedAt.Format(time.RFC3339))
+	_, err = h.DB.Exec(`INSERT INTO templates (id, name, description, width, height, grid_cols, grid_rows, widgets_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		t.ID, t.Name, t.Description, t.Width, t.Height, t.GridCols, t.GridRows, string(widgetsJSON), t.CreatedAt.Format(time.RFC3339), t.UpdatedAt.Format(time.RFC3339))
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -200,8 +213,8 @@ func (h *TemplateHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	now := time.Now().UTC().Format(time.RFC3339)
-	res, err := h.DB.Exec(`UPDATE templates SET name = ?, description = ?, width = ?, height = ?, widgets_json = ?, updated_at = ? WHERE id = ?`,
-		in.Name, in.Description, in.Width, in.Height, string(widgetsJSON), now, id)
+	res, err := h.DB.Exec(`UPDATE templates SET name = ?, description = ?, width = ?, height = ?, grid_cols = ?, grid_rows = ?, widgets_json = ?, updated_at = ? WHERE id = ?`,
+		in.Name, in.Description, in.Width, in.Height, in.GridCols, in.GridRows, string(widgetsJSON), now, id)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -211,7 +224,7 @@ func (h *TemplateHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	row := h.DB.QueryRow(`SELECT id, name, description, width, height, widgets_json, created_at, updated_at FROM templates WHERE id = ?`, id)
+	row := h.DB.QueryRow(`SELECT id, name, description, width, height, grid_cols, grid_rows, widgets_json, created_at, updated_at FROM templates WHERE id = ?`, id)
 	t, err := scanTemplate(row)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
@@ -252,7 +265,7 @@ type rowScanner interface {
 func scanTemplate(row rowScanner) (models.Template, error) {
 	var t models.Template
 	var widgetsJSON, createdAt, updatedAt string
-	if err := row.Scan(&t.ID, &t.Name, &t.Description, &t.Width, &t.Height, &widgetsJSON, &createdAt, &updatedAt); err != nil {
+	if err := row.Scan(&t.ID, &t.Name, &t.Description, &t.Width, &t.Height, &t.GridCols, &t.GridRows, &widgetsJSON, &createdAt, &updatedAt); err != nil {
 		return t, err
 	}
 	if err := json.Unmarshal([]byte(widgetsJSON), &t.Widgets); err != nil {

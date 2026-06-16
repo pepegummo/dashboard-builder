@@ -4,6 +4,7 @@ import { Line } from 'vue-chartjs'
 import {
   CategoryScale,
   Chart as ChartJS,
+  Filler,
   LinearScale,
   LineElement,
   PointElement,
@@ -14,7 +15,7 @@ import {
 import type { HistoryPoint } from '@/composables/useTelemetry'
 import type { WidgetElement } from '@/types'
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip)
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
 
 const props = defineProps<{
   title: string
