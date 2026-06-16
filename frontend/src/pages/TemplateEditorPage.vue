@@ -230,6 +230,10 @@ function setItemRef(id: string, el: Element | ComponentPublicInstance | null) {
 function selectWidget(id: string) {
   selectedId.value = id
   selectedElementKey.value = null
+  const w = form.widgets.find((w) => w.id === id)
+  if (w && !w.elements?.length && DEFAULT_ELEMENTS[w.type]) {
+    updateWidgetElements(w.id, DEFAULT_ELEMENTS[w.type]!.map((e) => ({ ...e })))
+  }
 }
 
 function selectElement(key: string) {

@@ -388,16 +388,36 @@ body {
 
 @container kpi-cell (min-height: 1px) {
   .widget-title {
-    font-size: max(0.45rem, 22cqh);
+    font-size: max(0.45rem, 70cqh);
     margin-bottom: 0;
   }
 
   .kpi-value {
-    font-size: max(0.55rem, 38cqh);
+    font-size: max(0.55rem, 80cqh);
   }
 
   .kpi-unit {
-    font-size: max(0.4rem, 20cqh);
+    font-size: max(0.4rem, 65cqh);
+  }
+
+  .gauge-value {
+    font-size: max(0.55rem, 70cqh);
+  }
+
+  .gauge-unit {
+    font-size: max(0.4rem, 55cqh);
+  }
+
+  .gauge-track {
+    height: max(0.4rem, 90cqh);
+  }
+
+  .status-badge {
+    font-size: max(0.5rem, 55cqh);
+  }
+
+  .gauge-minmax {
+    font-size: max(0.4rem, 65cqh);
   }
 }
 
