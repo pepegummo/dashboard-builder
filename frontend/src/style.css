@@ -1,5 +1,18 @@
 :root {
-  color-scheme: light;
+  color-scheme: dark light;
+
+  /* Dashboard dark-theme palette — shared by all widget components */
+  --db-bg:        #0a0e1a;   /* near-black canvas background */
+  --db-card-bg:   #111827;   /* widget card background */
+  --db-card-bg2:  #1a2236;   /* slightly lighter card variant */
+  --db-border:    rgba(255, 255, 255, 0.08);
+  --db-border-glow: rgba(0, 210, 255, 0.18);
+  --db-text:      #e2e8f0;   /* primary text */
+  --db-text-muted: #64748b;  /* muted/label text */
+  --db-accent:    #00d2ff;   /* cyan accent — dots, highlights */
+  --db-accent2:   #50cd89;   /* green accent — success / KPI */
+  --db-danger:    #e74c3c;
+  --db-warning:   #f1970f;
 }
 
 body {
@@ -193,7 +206,7 @@ body {
   /* Cap the preview to ~70% of the viewport height: width shrinks below
      100% for square/portrait canvases so height (set via aspect-ratio)
      never exceeds 70vh, instead of growing as tall as the board is wide. */
-  width: min(100%, calc(70vh * var(--canvas-ratio, 1)));
+  width: min(100%, calc((100vh - 14rem) * var(--canvas-ratio, 1)));
   margin: 0 auto;
 }
 
@@ -222,8 +235,9 @@ body {
   position: relative;
   width: 100%;
   margin: 0 auto;
-  background-color: #eef1f5;
-  border-radius: 0.375rem;
+  background-color: var(--db-bg);
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
 
 .dashboard-canvas-item {
@@ -451,10 +465,11 @@ body {
   padding: 0;
   border: none;
   border-radius: 50%;
-  background-color: #ced4da;
-  transition: background-color 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.25);
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .page-dot.active {
-  background-color: #0d6efd;
+  background-color: var(--db-accent);
+  box-shadow: 0 0 8px var(--db-accent);
 }

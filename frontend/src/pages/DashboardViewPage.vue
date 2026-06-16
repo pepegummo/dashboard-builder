@@ -71,7 +71,7 @@ watch(
 </script>
 
 <template>
-  <div>
+  <div class="db-view-shell">
     <div v-if="loading" class="text-center py-5">
       <div class="spinner-border text-primary" role="status"></div>
     </div>
@@ -104,3 +104,12 @@ watch(
     </template>
   </div>
 </template>
+
+<style scoped>
+/* Dark shell so the area around the canvas never flashes white */
+.db-view-shell {
+  background-color: var(--db-bg);
+  min-height: 100%;
+  padding: 0.5rem;
+}
+</style>

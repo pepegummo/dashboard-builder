@@ -28,8 +28,8 @@ const chartData = computed<ChartData<'bar'>>(() => ({
     {
       label: props.title,
       data: props.history.map((p) => p.v),
-      backgroundColor: 'rgba(13, 110, 253, 0.6)',
-      borderColor: '#0d6efd',
+      backgroundColor: 'rgba(0, 210, 255, 0.25)',
+      borderColor: '#00d2ff',
       borderWidth: 1,
       borderRadius: 4,
     },
@@ -43,9 +43,12 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => ({
   scales: {
     x: { display: false },
     y: {
+      grid: { color: 'rgba(255,255,255,0.06)' },
       ticks: {
+        color: '#64748b',
         callback: (value) => (props.unit ? `${value} ${props.unit}` : `${value}`),
       },
+      border: { color: 'rgba(255,255,255,0.1)' },
     },
   },
   plugins: {
@@ -55,7 +58,7 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => ({
 </script>
 
 <template>
-  <div class="card widget-card shadow-sm">
+  <div class="card widget-card db-widget-card shadow-sm">
     <div class="card-body" :class="elements?.length ? 'p-0 position-relative' : ''">
       <template v-if="elements?.length">
         <div class="kpi-elements-canvas">
@@ -66,12 +69,12 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => ({
             :style="{ left: el.x + '%', top: el.y + '%', width: el.w + '%', height: el.h + '%' }"
           >
             <template v-if="el.key === 'title'">
-              <h6 class="card-subtitle text-muted widget-title mb-0">{{ title }}</h6>
+              <h6 class="widget-title db-label mb-0">{{ title }}</h6>
             </template>
             <template v-else-if="el.key === 'chart'">
               <div class="position-absolute" style="inset: 0;">
                 <Bar v-if="history.length" :data="chartData" :options="chartOptions" />
-                <div v-else class="d-flex align-items-center justify-content-center h-100 text-muted small">
+                <div v-else class="d-flex align-items-center justify-content-center h-100 db-waiting small">
                   Waiting for data…
                 </div>
               </div>
@@ -80,10 +83,10 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => ({
         </div>
       </template>
       <template v-else>
-        <h6 class="card-subtitle text-muted widget-title">{{ title }}</h6>
+        <h6 class="widget-title db-label">{{ title }}</h6>
         <div class="chart-container">
           <Bar v-if="history.length" :data="chartData" :options="chartOptions" />
-          <div v-else class="d-flex align-items-center justify-content-center h-100 text-muted small">
+          <div v-else class="d-flex align-items-center justify-content-center h-100 db-waiting small">
             Waiting for data…
           </div>
         </div>
@@ -91,3 +94,25 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => ({
     </div>
   </div>
 </template>
+
+<style scoped>
+.db-widget-card {
+  background-color: var(--db-card-bg) !important;
+  border: 1px solid var(--db-border) !important;
+  border-radius: 0.625rem !important;
+  box-shadow: 0 0 0 1px var(--db-border-glow), 0 4px 24px rgba(0, 0, 0, 0.5) !important;
+  color: var(--db-text);
+  overflow: hidden;
+}
+
+.db-label {
+  color: var(--db-text-muted) !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: inherit;
+}
+
+.db-waiting {
+  color: var(--db-text-muted);
+}
+</style>
