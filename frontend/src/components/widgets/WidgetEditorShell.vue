@@ -6,21 +6,18 @@ const props = defineProps<{
   widget: Widget
   isSelected: boolean
   isElementEditing: boolean
+  activeElementKey?: string
 }>()
 
 const emit = defineEmits<{
   select: []
   remove: []
-  'edit-elements': []
   'update-elements': [WidgetElement[]]
+  'select-element': [string]
 }>()
 
 function handleBodyClick() {
-  if (props.isSelected) {
-    emit('edit-elements')
-  } else {
-    emit('select')
-  }
+  emit('select')
 }
 </script>
 
@@ -55,7 +52,9 @@ function handleBodyClick() {
     <WidgetElementEditor
       v-if="isElementEditing"
       :widget="widget"
+      :activeKey="activeElementKey"
       @update:elements="emit('update-elements', $event)"
+      @select-element="emit('select-element', $event)"
     />
   </div>
 </template>

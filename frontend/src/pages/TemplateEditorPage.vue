@@ -11,6 +11,7 @@ import WidgetRenderer from '@/components/widgets/WidgetRenderer.vue'
 import WidgetEditorShell from '@/components/widgets/WidgetEditorShell.vue'
 import type { HistoryPoint } from '@/composables/useTelemetry'
 import type { Widget, WidgetElement, WidgetType } from '@/types'
+import { DEFAULT_ELEMENTS } from '@/utils/widgetElements'
 
 const props = defineProps<{ id?: string }>()
 
@@ -38,7 +39,6 @@ const saving = ref(false)
 const error = ref('')
 
 const selectedId = ref<string | null>(null)
-const elementEditMode = ref(false)
 const selectedElementKey = ref<string | null>(null)
 const gridEl = ref<HTMLElement | null>(null)
 let grid: GridStack | null = null
@@ -229,13 +229,11 @@ function setItemRef(id: string, el: Element | ComponentPublicInstance | null) {
 
 function selectWidget(id: string) {
   selectedId.value = id
-  elementEditMode.value = false
   selectedElementKey.value = null
 }
 
-function enterElementEdit(id: string) {
-  selectedId.value = id
-  elementEditMode.value = true
+function selectElement(key: string) {
+  selectedElementKey.value = selectedElementKey.value === key ? null : key
 }
 
 function updateWidgetElements(id: string, els: WidgetElement[]) {
@@ -243,23 +241,17 @@ function updateWidgetElements(id: string, els: WidgetElement[]) {
   if (w) w.elements = els
 }
 
-const KPI_DEFAULT_ELEMENTS: WidgetElement[] = [
-  { key: 'title', x: 0, y: 0,  w: 100, h: 25 },
-  { key: 'value', x: 0, y: 25, w: 100, h: 50 },
-  { key: 'unit',  x: 0, y: 75, w: 100, h: 25 },
-]
-
 const selectedWidgetElements = computed<WidgetElement[]>(() => {
   const w = selectedWidget.value
-  if (!w || w.type !== 'kpi') return []
-  return (w.elements?.length ? w.elements : KPI_DEFAULT_ELEMENTS).map((e) => ({ ...e }))
+  if (!w) return []
+  return (w.elements?.length ? w.elements : DEFAULT_ELEMENTS[w.type] ?? []).map((e) => ({ ...e }))
 })
 
 function updateElementProp(key: string, prop: keyof Omit<WidgetElement, 'key'>, rawVal: number) {
   const w = selectedWidget.value
   if (!w) return
   const val = Math.round(Math.min(100, Math.max(prop === 'w' || prop === 'h' ? 1 : 0, rawVal)))
-  const base = w.elements?.length ? w.elements : KPI_DEFAULT_ELEMENTS
+  const base = w.elements?.length ? w.elements : (DEFAULT_ELEMENTS[w.type] ?? [])
   updateWidgetElements(w.id, base.map((e) => e.key === key ? { ...e, [prop]: val } : { ...e }))
 }
 
@@ -462,8 +454,8 @@ async function save() {
               <strong>Widget properties</strong>
             </div>
             <div class="card-body">
-              <div v-if="selectedWidget && elementEditMode" class="alert alert-info py-1 px-2 small mb-2">
-                <i class="bi bi-arrows-move me-1"></i>Drag elements to reposition. Click ⚙ to exit.
+              <div v-if="selectedWidget && selectedElementKey !== null" class="alert alert-info py-1 px-2 small mb-2">
+                <i class="bi bi-arrows-move me-1"></i>Drag the handle to reposition. Click the element row to deselect.
               </div>
               <template v-if="selectedWidget">
                 <div class="mb-2">
@@ -516,8 +508,8 @@ async function save() {
                     />
                   </div>
                 </div>
-                <!-- KPI element positions list -->
-                <template v-if="selectedWidget.type === 'kpi'">
+                <!-- Element positions list -->
+                <template v-if="selectedWidgetElements.length">
                   <hr class="my-2" />
                   <label class="form-label small text-muted mb-1">
                     <i class="bi bi-layout-three-columns me-1"></i>Elements
@@ -531,7 +523,7 @@ async function save() {
                       type="button"
                       class="btn btn-sm w-100 text-start px-2 py-1 d-flex align-items-center justify-content-between"
                       :class="selectedElementKey === el.key ? 'btn-primary' : 'btn-light'"
-                      @click="selectedElementKey = selectedElementKey === el.key ? null : el.key"
+                      @click="selectElement(el.key)"
                     >
                       <span class="text-capitalize small fw-semibold">{{ el.key }}</span>
                       <i :class="['bi', selectedElementKey === el.key ? 'bi-chevron-up' : 'bi-chevron-down']"></i>
@@ -621,11 +613,12 @@ async function save() {
                       <WidgetEditorShell
                         :widget="w"
                         :isSelected="selectedId === w.id"
-                        :isElementEditing="selectedId === w.id && elementEditMode"
+                        :isElementEditing="selectedId === w.id"
+                        :activeElementKey="selectedId === w.id ? selectedElementKey ?? undefined : undefined"
                         @select="selectWidget(w.id)"
-                        @edit-elements="enterElementEdit(w.id)"
                         @remove="removeWidget(w.id)"
                         @update-elements="updateWidgetElements(w.id, $event)"
+                        @select-element="selectElement($event)"
                       >
                         <WidgetRenderer :widget="w" :readings="sampleReadings" :history="sampleHistory" />
                       </WidgetEditorShell>

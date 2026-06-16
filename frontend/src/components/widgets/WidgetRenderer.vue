@@ -25,7 +25,7 @@ const widgetHistory = computed(() => props.history[props.widget.metricKey] ?? []
 </script>
 
 <template>
-  <StatusWidget v-if="widget.type === 'status'" :title="widget.title" :value="value" />
+  <StatusWidget v-if="widget.type === 'status'" :title="widget.title" :value="value" :elements="widget.elements" />
   <KpiWidget
     v-else-if="widget.type === 'kpi'"
     :title="widget.title"
@@ -40,18 +40,21 @@ const widgetHistory = computed(() => props.history[props.widget.metricKey] ?? []
     :min="metric?.min ?? 0"
     :max="metric?.max ?? 100"
     :unit="metric?.unit"
+    :elements="widget.elements"
   />
   <LineChartWidget
     v-else-if="widget.type === 'line'"
     :title="widget.title"
     :history="widgetHistory"
     :unit="metric?.unit"
+    :elements="widget.elements"
   />
   <BarChartWidget
     v-else-if="widget.type === 'bar'"
     :title="widget.title"
     :history="widgetHistory"
     :unit="metric?.unit"
+    :elements="widget.elements"
   />
-  <TableWidget v-else :title="widget.title" :readings="readings" />
+  <TableWidget v-else :title="widget.title" :readings="readings" :elements="widget.elements" />
 </template>

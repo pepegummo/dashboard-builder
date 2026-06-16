@@ -319,7 +319,7 @@ body {
 /* WidgetElementEditor overlay */
 .widget-element-editor-overlay {
   position: absolute;
-  inset: 0;
+  inset: 1px;
   z-index: 20;
   background: rgba(255, 255, 255, 0.1);
 }
@@ -329,6 +329,12 @@ body {
   border: 1px dashed #0d6efd;
   background: rgba(13, 110, 253, 0.07);
   box-sizing: border-box;
+  cursor: pointer;
+}
+
+.element-handle.is-active {
+  border: 2px solid #0d6efd;
+  background: rgba(13, 110, 253, 0.15);
 }
 
 .element-drag-body {
@@ -376,6 +382,23 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  container-type: size;
+  container-name: kpi-cell;
+}
+
+@container kpi-cell (min-height: 1px) {
+  .widget-title {
+    font-size: max(0.45rem, 22cqh);
+    margin-bottom: 0;
+  }
+
+  .kpi-value {
+    font-size: max(0.55rem, 38cqh);
+  }
+
+  .kpi-unit {
+    font-size: max(0.4rem, 20cqh);
+  }
 }
 
 .widget-editor-shell.is-selected .widget-card {

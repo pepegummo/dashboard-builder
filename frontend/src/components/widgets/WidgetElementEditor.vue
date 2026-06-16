@@ -1,17 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { Widget, WidgetElement } from '@/types'
+import { DEFAULT_ELEMENTS } from '@/utils/widgetElements'
 
-const props = defineProps<{ widget: Widget }>()
-const emit = defineEmits<{ 'update:elements': [WidgetElement[]] }>()
-
-const DEFAULT_ELEMENTS: Partial<Record<string, WidgetElement[]>> = {
-  kpi: [
-    { key: 'title', x: 0, y: 0,  w: 100, h: 25 },
-    { key: 'value', x: 0, y: 25, w: 100, h: 50 },
-    { key: 'unit',  x: 0, y: 75, w: 100, h: 25 },
-  ],
-}
+const props = defineProps<{ widget: Widget; activeKey?: string }>()
+const emit = defineEmits<{ 'update:elements': [WidgetElement[]]; 'select-element': [string] }>()
 
 const containerRef = ref<HTMLElement | null>(null)
 const elements = ref<WidgetElement[]>([])
@@ -113,6 +106,11 @@ function startResize(el: WidgetElement, e: MouseEvent) {
   window.addEventListener('mousemove', onMove)
   window.addEventListener('mouseup', onUp)
 }
+
+function handleElementClick(el: WidgetElement, e: MouseEvent) {
+  e.stopPropagation()
+  emit('select-element', el.key)
+}
 </script>
 
 <template>
@@ -121,7 +119,9 @@ function startResize(el: WidgetElement, e: MouseEvent) {
       v-for="el in elements"
       :key="el.key"
       class="element-handle"
+      :class="{ 'is-active': el.key === activeKey }"
       :style="elementStyle(el)"
+      @click.stop="handleElementClick(el, $event)"
     >
       <div class="element-drag-body" @mousedown.stop="startDrag(el, $event)">
         <span class="element-label">{{ el.key }}</span>

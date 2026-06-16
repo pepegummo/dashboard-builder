@@ -11,6 +11,7 @@ import {
   type ChartOptions,
 } from 'chart.js'
 import type { HistoryPoint } from '@/composables/useTelemetry'
+import type { WidgetElement } from '@/types'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip)
 
@@ -18,6 +19,7 @@ const props = defineProps<{
   title: string
   history: HistoryPoint[]
   unit?: string
+  elements?: WidgetElement[]
 }>()
 
 const chartData = computed<ChartData<'bar'>>(() => ({
@@ -54,14 +56,38 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => ({
 
 <template>
   <div class="card widget-card shadow-sm">
-    <div class="card-body">
-      <h6 class="card-subtitle text-muted widget-title">{{ title }}</h6>
-      <div class="chart-container">
-        <Bar v-if="history.length" :data="chartData" :options="chartOptions" />
-        <div v-else class="d-flex align-items-center justify-content-center h-100 text-muted small">
-          Waiting for data…
+    <div class="card-body" :class="elements?.length ? 'p-0 position-relative' : ''">
+      <template v-if="elements?.length">
+        <div class="kpi-elements-canvas">
+          <div
+            v-for="el in elements"
+            :key="el.key"
+            class="kpi-element-cell"
+            :style="{ left: el.x + '%', top: el.y + '%', width: el.w + '%', height: el.h + '%' }"
+          >
+            <template v-if="el.key === 'title'">
+              <h6 class="card-subtitle text-muted widget-title mb-0">{{ title }}</h6>
+            </template>
+            <template v-else-if="el.key === 'chart'">
+              <div class="position-absolute" style="inset: 0;">
+                <Bar v-if="history.length" :data="chartData" :options="chartOptions" />
+                <div v-else class="d-flex align-items-center justify-content-center h-100 text-muted small">
+                  Waiting for data…
+                </div>
+              </div>
+            </template>
+          </div>
         </div>
-      </div>
+      </template>
+      <template v-else>
+        <h6 class="card-subtitle text-muted widget-title">{{ title }}</h6>
+        <div class="chart-container">
+          <Bar v-if="history.length" :data="chartData" :options="chartOptions" />
+          <div v-else class="d-flex align-items-center justify-content-center h-100 text-muted small">
+            Waiting for data…
+          </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>
