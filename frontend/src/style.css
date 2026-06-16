@@ -1,6 +1,4 @@
 :root {
-  color-scheme: dark light;
-
   /* Dashboard dark-theme palette — shared by all widget components */
   --db-bg:        #0a0e1a;   /* near-black canvas background */
   --db-card-bg:   #111827;   /* widget card background */
@@ -206,7 +204,7 @@ body {
   /* Cap the preview to ~70% of the viewport height: width shrinks below
      100% for square/portrait canvases so height (set via aspect-ratio)
      never exceeds 70vh, instead of growing as tall as the board is wide. */
-  width: min(100%, calc((100vh - 14rem) * var(--canvas-ratio, 1)));
+  width: min(100%, calc(70vh * var(--canvas-ratio, 1)));
   margin: 0 auto;
 }
 

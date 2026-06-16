@@ -132,4 +132,9 @@ function formatNumber(value: number): string {
 .db-track {
   background-color: rgba(255, 255, 255, 0.08) !important;
 }
+
+.db-bar {
+  background-color: var(--db-accent);
+  transition: width 0.4s ease;
+}
 </style>

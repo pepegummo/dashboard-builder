@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { WidgetElement } from '@/types'
 
 const props = defineProps<{
@@ -7,14 +8,15 @@ const props = defineProps<{
   elements?: WidgetElement[]
 }>()
 
-/* Map known status values to inline bg/glow color pairs */
-function statusColor(value: string | number | null | undefined): { bg: string; glow: string } {
-  const key = String(value ?? '').toLowerCase()
-  if (key === 'running') return { bg: '#2d8470', glow: 'rgba(45, 132, 112, 0.5)' }
-  if (key === 'stopped' || key === 'error') return { bg: '#e74c3c', glow: 'rgba(231, 76, 60, 0.5)' }
-  if (key === 'idle') return { bg: '#f1970f', glow: 'rgba(241, 151, 15, 0.5)' }
-  return { bg: '#64748b', glow: 'rgba(100, 116, 139, 0.4)' }
-}
+/* Computed style object for the status badge — evaluated once per render */
+const statusStyle = computed(() => {
+  const v = (props.value as string | undefined)?.toLowerCase() ?? ''
+  let bg = '#64748b'
+  if (v === 'running') bg = '#2d8470'
+  else if (v === 'stopped' || v === 'error') bg = 'var(--db-danger)'
+  else if (v === 'idle') bg = 'var(--db-warning)'
+  return { backgroundColor: bg, boxShadow: `0 0 8px ${bg}` }
+})
 </script>
 
 <template>
@@ -34,10 +36,7 @@ function statusColor(value: string | number | null | undefined): { bg: string; g
             <template v-else-if="el.key === 'badge'">
               <span
                 class="status-badge db-status-pill text-uppercase fw-semibold"
-                :style="{
-                  backgroundColor: statusColor(value).bg,
-                  boxShadow: `0 0 12px ${statusColor(value).glow}`,
-                }"
+                :style="statusStyle"
               >{{ value ?? '—' }}</span>
             </template>
           </div>
@@ -47,10 +46,7 @@ function statusColor(value: string | number | null | undefined): { bg: string; g
         <h6 class="widget-title db-label">{{ title }}</h6>
         <span
           class="status-badge db-status-pill text-uppercase fw-semibold"
-          :style="{
-            backgroundColor: statusColor(value).bg,
-            boxShadow: `0 0 12px ${statusColor(value).glow}`,
-          }"
+          :style="statusStyle"
         >{{ value ?? '—' }}</span>
       </template>
     </div>

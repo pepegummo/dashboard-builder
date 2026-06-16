@@ -108,6 +108,7 @@ watch(
 <style scoped>
 /* Dark shell so the area around the canvas never flashes white */
 .db-view-shell {
+  color-scheme: dark;
   background-color: var(--db-bg);
   min-height: 100%;
   padding: 0.5rem;
