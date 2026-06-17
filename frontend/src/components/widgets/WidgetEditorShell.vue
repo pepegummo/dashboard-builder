@@ -17,16 +17,13 @@ const emit = defineEmits<{
   'select-element': [string]
 }>()
 
-function handleBodyClick() {
-  emit('select')
-}
 </script>
 
 <template>
   <div
     class="widget-editor-shell"
     :class="{ 'is-selected': isSelected }"
-    @click="handleBodyClick"
+    @click="$emit('select')"
   >
     <div class="widget-shell-toolbar">
       <span class="drag-handle"><i class="bi bi-grip-vertical"></i></span>

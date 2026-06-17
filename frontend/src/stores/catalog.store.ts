@@ -39,9 +39,6 @@ export const useCatalogStore = defineStore('catalog', {
         this.loadingMetrics = false
       }
     },
-    metricLabel(key: string): string {
-      return this.metrics.find((m) => m.key === key)?.label ?? key
-    },
     metricUnit(key: string): string {
       return this.metrics.find((m) => m.key === key)?.unit ?? ''
     },

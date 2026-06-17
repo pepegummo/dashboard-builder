@@ -6,7 +6,7 @@ import { GridStack, type GridStackNode } from 'gridstack'
 import 'gridstack/dist/gridstack.min.css'
 import { useTemplateStore } from '@/stores/template.store'
 import { useCatalogStore } from '@/stores/catalog.store'
-import { apiErrorMessage } from '@/services/api'
+import { api, apiErrorMessage } from '@/services/api'
 import WidgetRenderer from '@/components/widgets/WidgetRenderer.vue'
 import WidgetEditorShell from '@/components/widgets/WidgetEditorShell.vue'
 import type { HistoryPoint } from '@/composables/useTelemetry'
@@ -181,7 +181,7 @@ onMounted(async () => {
   if (props.id) {
     loading.value = true
     try {
-      const t = await templateStore.getTemplate(props.id)
+      const t = await api.getTemplate(props.id)
       form.name = t.name
       form.description = t.description
       form.width = t.width

@@ -3,13 +3,12 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTemplateStore } from '@/stores/template.store'
 import { useCatalogStore } from '@/stores/catalog.store'
-import { useDashboardStore } from '@/stores/dashboard.store'
-import { apiErrorMessage } from '@/services/api'
+import { api, apiErrorMessage } from '@/services/api'
 
 const router = useRouter()
 const templateStore = useTemplateStore()
 const catalog = useCatalogStore()
-const dashboardStore = useDashboardStore()
+
 
 const step = ref(1)
 const totalSteps = 4
@@ -111,7 +110,7 @@ async function createDashboard() {
   error.value = ''
   creating.value = true
   try {
-    const result = await dashboardStore.createDashboard({
+    const result = await api.createDashboard({
       name: dashboardName.value.trim(),
       templateId: selectedTemplateId.value,
       factoryId: selectedFactoryId.value,

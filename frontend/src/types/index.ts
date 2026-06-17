@@ -57,16 +57,7 @@ export interface Template {
   updatedAt: string
 }
 
-// Payload for creating/updating a template.
-export interface TemplateInput {
-  name: string
-  description: string
-  width: number
-  height: number
-  gridCols: number
-  gridRows: number
-  widgets: Widget[]
-}
+export type TemplateInput = Omit<Template, 'id' | 'createdAt' | 'updatedAt'>
 
 export interface DashboardPage {
   id: string

@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useDashboardStore } from '@/stores/dashboard.store'
 import { useCatalogStore } from '@/stores/catalog.store'
 import { useTelemetry } from '@/composables/useTelemetry'
-import { apiErrorMessage } from '@/services/api'
+import { api, apiErrorMessage } from '@/services/api'
 import WidgetRenderer from '@/components/widgets/WidgetRenderer.vue'
 import type { Dashboard } from '@/types'
 
 const props = defineProps<{ id: string }>()
 
-const dashboardStore = useDashboardStore()
 const catalog = useCatalogStore()
 const { reading, history, start } = useTelemetry()
 
@@ -37,7 +35,7 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    dashboard.value = await dashboardStore.getDashboard(props.id)
+    dashboard.value = await api.getDashboard(props.id)
   } catch (err) {
     error.value = apiErrorMessage(err, 'Failed to load dashboard')
   } finally {

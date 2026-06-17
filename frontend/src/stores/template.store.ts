@@ -16,9 +16,6 @@ export const useTemplateStore = defineStore('templates', {
         this.loading = false
       }
     },
-    async getTemplate(id: string) {
-      return api.getTemplate(id)
-    },
     async createTemplate(input: TemplateInput) {
       const created = await api.createTemplate(input)
       this.templates.push(created)
