@@ -40,6 +40,7 @@ const activeTab = ref<'settings' | 'widgets' | 'config'>('settings')
 
 const selectedId = ref<string | null>(null)
 const selectedElementKey = ref<string | null>(null)
+const hoveredElementKey = ref<string | undefined>(undefined)
 
 const WIDGET_TYPE_COLORS: Record<string, string> = {
   gauge: '#0d6efd', line: '#0dcaf0', kpi: '#198754',
@@ -648,6 +649,8 @@ async function save() {
                     class="btn btn-sm w-100 text-start px-2 py-1 d-flex align-items-center justify-content-between"
                     :class="selectedElementKey === el.key ? 'btn-primary' : 'btn-light'"
                     @click="selectElement(el.key)"
+                    @mouseenter="hoveredElementKey = el.key"
+                    @mouseleave="hoveredElementKey = undefined"
                   >
                     <span class="text-capitalize small fw-semibold">{{ el.key }}</span>
                     <i :class="['bi', selectedElementKey === el.key ? 'bi-chevron-up' : 'bi-chevron-down']"></i>
@@ -755,6 +758,7 @@ async function save() {
                       :isSelected="selectedId === w.id"
                       :isElementEditing="selectedId === w.id"
                       :activeElementKey="selectedId === w.id ? selectedElementKey ?? undefined : undefined"
+                      :hoveredElementKey="selectedId === w.id ? hoveredElementKey : undefined"
                       @select="selectWidget(w.id)"
                       @remove="removeWidget(w.id)"
                       @update-elements="updateWidgetElements(w.id, $event)"

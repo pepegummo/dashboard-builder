@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import type { Widget, WidgetElement } from '@/types'
 import { DEFAULT_ELEMENTS } from '@/utils/widgetElements'
 
-const props = defineProps<{ widget: Widget; activeKey?: string }>()
+const props = defineProps<{ widget: Widget; activeKey?: string; hoveredKey?: string }>()
 const emit = defineEmits<{ 'update:elements': [WidgetElement[]]; 'select-element': [string] }>()
 
 const containerRef = ref<HTMLElement | null>(null)
@@ -119,7 +119,7 @@ function handleElementClick(el: WidgetElement, e: MouseEvent) {
       v-for="el in elements"
       :key="el.key"
       class="element-handle"
-      :class="{ 'is-active': el.key === activeKey }"
+      :class="{ 'is-active': el.key === activeKey, 'is-hovered': el.key === hoveredKey && el.key !== activeKey }"
       :style="elementStyle(el)"
       @click.stop="handleElementClick(el, $event)"
     >

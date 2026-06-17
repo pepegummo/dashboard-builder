@@ -7,6 +7,7 @@ const props = defineProps<{
   isSelected: boolean
   isElementEditing: boolean
   activeElementKey?: string
+  hoveredElementKey?: string
 }>()
 
 const emit = defineEmits<{
@@ -53,6 +54,7 @@ function handleBodyClick() {
       v-if="isElementEditing"
       :widget="widget"
       :activeKey="activeElementKey"
+      :hoveredKey="hoveredElementKey"
       @update:elements="emit('update-elements', $event)"
       @select-element="emit('select-element', $event)"
     />
