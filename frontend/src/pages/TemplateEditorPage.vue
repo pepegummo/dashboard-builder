@@ -175,6 +175,7 @@ watch([() => form.gridCols, () => form.gridRows], async () => {
 })
 
 onMounted(async () => {
+  window.addEventListener('keydown', handleKeydown)
   await catalog.fetchMetrics()
   if (props.id) {
     loading.value = true
@@ -198,6 +199,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
   resizeObserver?.disconnect()
   resizeObserver = null
   grid?.destroy(false)
@@ -257,6 +259,15 @@ function selectWidget(id: string) {
 
 function selectElement(key: string) {
   selectedElementKey.value = selectedElementKey.value === key ? null : key
+}
+
+function exitElementEdit() {
+  selectedId.value = null
+  selectedElementKey.value = null
+}
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') exitElementEdit()
 }
 
 function updateWidgetElements(id: string, els: WidgetElement[]) {
@@ -561,7 +572,13 @@ async function save() {
                   class="widget-type-pill"
                   :style="{ backgroundColor: WIDGET_TYPE_COLORS[selectedWidget.type] ?? '#6c757d' }"
                 >{{ selectedWidget.type }}</span>
-                <span class="text-muted small">{{ selectedWidget.title }}</span>
+                <span class="text-muted small flex-grow-1 text-truncate">{{ selectedWidget.title }}</span>
+                <button
+                  type="button"
+                  class="btn-close btn-sm ms-auto flex-shrink-0"
+                  title="Deselect (Esc)"
+                  @click="exitElementEdit()"
+                ></button>
               </div>
 
               <div v-if="selectedElementKey !== null" class="alert alert-info py-1 px-2 small mb-2">
@@ -708,7 +725,7 @@ async function save() {
         <div class="card shadow-sm h-100">
           <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
             <strong>Board</strong>
-            <span class="text-muted small">Hover a widget — drag ⠿ to move, ⚙ to configure, drag corner to resize</span>
+            <span class="text-muted small">Click widget to select — hover elements to highlight, click to configure, Esc to deselect</span>
           </div>
           <div class="card-body p-2 overflow-auto">
             <div
