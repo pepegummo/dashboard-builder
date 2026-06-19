@@ -19,7 +19,7 @@ const errorMsg = ref('')
 
 watch(
   () => props.context,
-  () => { messages.value = []; answer.value = '' },
+  () => { messages.value = []; answer.value = ''; errorMsg.value = '' },
 )
 
 async function submit() {
@@ -30,7 +30,7 @@ async function submit() {
   question.value = ''
   messages.value.push({ role: 'user', content: q })
   try {
-    const { reply } = await api.chat(messages.value, props.context)
+    const { reply } = await api.chat(messages.value.slice(-20), props.context)
     messages.value.push({ role: 'assistant', content: reply })
     answer.value = reply
     const indices = [...reply.matchAll(/\[(\d+)\]/g)].map((m) => parseInt(m[1]))
