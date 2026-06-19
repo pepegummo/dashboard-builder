@@ -63,8 +63,18 @@ watch(currentMachine, (machine) => { if (machine) start(machine.id) }, { immedia
 
 // --- Element inspect overlay ---
 const hovered = ref<{ widgetId: string; key: string } | null>(null)
+const focused = ref<{ widgetId: string; key: string } | null>(null)
 
-function onElementClick(w: Widget, key: string) {
+function highlightWidget(i: number) {
+  const w = widgets.value[i]
+  highlightedWidgets.value = [i]
+  focused.value = null
+  prefillQuestion.value = `Explain the "${w.title}" ${w.type} widget overall.`
+}
+
+function onElementClick(w: Widget, key: string, i: number) {
+  highlightedWidgets.value = [i]
+  focused.value = { widgetId: w.id, key }
   prefillQuestion.value = `What is the "${key}" element on the "${w.title}" widget?`
 }
 
@@ -115,13 +125,15 @@ const exploreContext = computed(() => buildContext())
     <div v-else-if="dashboard" class="explore-split">
       <!-- Left: canvas -->
       <div class="explore-canvas-col">
-        <div class="dashboard-canvas" :style="canvasStyle">
+        <div class="dashboard-canvas" :style="canvasStyle" @click.self="highlightedWidgets = []; focused = null">
+          <div v-if="highlightedWidgets.length" class="canvas-spotlight-overlay"></div>
           <div
             v-for="(w, i) in widgets"
             :key="w.id"
             class="dashboard-canvas-item"
             :class="{ highlighted: highlightedWidgets.includes(i) }"
             :style="{ left: `${w.x}%`, top: `${w.y}%`, width: `${w.w}%`, height: `${w.h}%` }"
+            @click="highlightWidget(i)"
           >
             <WidgetRenderer :widget="w" :readings="reading" :history="history" :machine="currentMachine" />
             <div class="inspect-overlay">
@@ -130,12 +142,13 @@ const exploreContext = computed(() => buildContext())
                 :key="el.key"
                 class="element-handle"
                 :class="{
+                  'is-active':  focused?.widgetId === w.id && focused?.key === el.key,
                   'is-hovered': hovered?.widgetId === w.id && hovered?.key === el.key,
                 }"
                 :style="{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%` }"
                 @mouseenter="hovered = { widgetId: w.id, key: el.key }"
                 @mouseleave="hovered = null"
-                @click="onElementClick(w, el.key)"
+                @click.stop="onElementClick(w, el.key, i)"
               >
                 <span class="element-label">{{ el.key }}</span>
               </div>

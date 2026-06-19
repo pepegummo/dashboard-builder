@@ -507,7 +507,16 @@ body {
 .dashboard-canvas-item.highlighted {
   outline: 2px solid var(--db-accent);
   box-shadow: 0 0 14px var(--db-accent);
-  z-index: 5;
+  z-index: 6;
   border-radius: 0.25rem;
-  transition: outline 0.2s, box-shadow 0.2s;
+}
+
+.canvas-spotlight-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 4;
+  pointer-events: none;
+  border-radius: 0.5rem;
+  transition: opacity 0.2s;
 }
