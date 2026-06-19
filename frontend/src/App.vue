@@ -59,6 +59,15 @@ watchEffect(() => apply(mode.value))
                 <i class="bi bi-layout-text-window-reverse me-1"></i>Templates
               </RouterLink>
             </li>
+            <li class="nav-item">
+              <RouterLink
+                class="nav-link"
+                :class="{ active: route.name === 'explore' }"
+                :to="{ name: 'explore' }"
+              >
+                <i class="bi bi-chat-dots me-1"></i>Explore
+              </RouterLink>
+            </li>
           </ul>
           <select v-model="mode" class="form-select form-select-sm w-auto me-2">
             <option value="system">System</option>

@@ -22,12 +22,13 @@ func NewTemplateHandler(db *sql.DB) *TemplateHandler {
 }
 
 var validWidgetTypes = map[string]bool{
-	"gauge":  true,
-	"line":   true,
-	"bar":    true,
-	"kpi":    true,
-	"status": true,
-	"table":  true,
+	"gauge":   true,
+	"line":    true,
+	"bar":     true,
+	"kpi":     true,
+	"status":  true,
+	"table":   true,
+	"machine": true,
 }
 
 // percentGrid is the size of the percent-based widget layout grid; widget
@@ -137,7 +138,7 @@ func (in *templateInput) validate() error {
 		if wgt.X+wgt.W > percentGrid || wgt.Y+wgt.H > percentGrid {
 			return errors.New("widget '" + wgt.Title + "' extends outside the canvas")
 		}
-		if wgt.Type != "table" {
+		if wgt.Type != "table" && wgt.Type != "machine" {
 			if wgt.MetricKey == "" {
 				return errors.New("widget '" + wgt.Title + "' requires a metric")
 			}

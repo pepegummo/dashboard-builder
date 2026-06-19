@@ -29,6 +29,7 @@ func NewRouter(database *sql.DB) http.Handler {
 	templateH := handlers.NewTemplateHandler(database)
 	dashboardH := handlers.NewDashboardHandler(database)
 	telemetryH := handlers.NewTelemetryHandler(database)
+	chatH := handlers.NewChatHandler()
 
 	r.Get("/api/health", func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -41,6 +42,8 @@ func NewRouter(database *sql.DB) http.Handler {
 	})
 
 	r.Get("/api/metrics", templateH.Metrics)
+
+	r.Post("/api/chat", chatH.Send)
 
 	r.Route("/api/templates", func(r chi.Router) {
 		r.Get("/", templateH.List)

@@ -10,7 +10,7 @@ import { api, apiErrorMessage } from '@/services/api'
 import WidgetRenderer from '@/components/widgets/WidgetRenderer.vue'
 import WidgetEditorShell from '@/components/widgets/WidgetEditorShell.vue'
 import type { HistoryPoint } from '@/composables/useTelemetry'
-import type { Widget, WidgetElement, WidgetType } from '@/types'
+import type { MetricDef, Widget, WidgetElement, WidgetType } from '@/types'
 import { DEFAULT_ELEMENTS } from '@/utils/widgetElements'
 
 const props = defineProps<{ id?: string }>()
@@ -42,6 +42,21 @@ const selectedId = ref<string | null>(null)
 const selectedElementKey = ref<string | null>(null)
 const hoveredElementKey = ref<string | undefined>(undefined)
 
+const metricTypeFilter = ref<string>('')
+const availableMetricTypes = computed<string[]>(() => {
+  const types = new Set<string>()
+  for (const m of catalog.metrics) {
+    for (const t of m.types ?? []) types.add(t)
+  }
+  return Array.from(types).sort()
+})
+const filteredMetrics = computed<MetricDef[]>(() => {
+  if (!metricTypeFilter.value) return catalog.metrics
+  return catalog.metrics.filter(
+    (m) => !m.types?.length || m.types.includes(metricTypeFilter.value),
+  )
+})
+
 const WIDGET_TYPE_COLORS: Record<string, string> = {
   gauge: '#0d6efd', line: '#0dcaf0', kpi: '#198754',
   status: '#fd7e14', table: '#6c757d', bar: '#6610f2',
@@ -59,6 +74,7 @@ const widgetTypeOptions: { value: WidgetType; label: string; icon: string }[] = 
   { value: 'line', label: 'Line chart', icon: 'bi-graph-up' },
   { value: 'bar', label: 'Bar chart', icon: 'bi-bar-chart-fill' },
   { value: 'table', label: 'Table', icon: 'bi-table' },
+  { value: 'machine', label: 'Machine Info', icon: 'bi-cpu' },
 ]
 
 const defaultSize: Record<WidgetType, { w: number; h: number }> = {
@@ -68,6 +84,7 @@ const defaultSize: Record<WidgetType, { w: number; h: number }> = {
   line: { w: 50, h: 34 },
   bar: { w: 50, h: 34 },
   table: { w: 100, h: 34 },
+  machine: { w: 25, h: 22 },
 }
 
 const selectedWidget = computed(() => form.widgets.find((w) => w.id === selectedId.value) ?? null)
@@ -303,7 +320,7 @@ function addWidget(type: WidgetType) {
     id: newWidgetId(),
     type,
     title: widgetTypeOptions.find((o) => o.value === type)?.label ?? 'Widget',
-    metricKey: type === 'table' ? '' : (catalog.metrics[0]?.key ?? ''),
+    metricKey: type === 'table' || type === 'machine' ? '' : (catalog.metrics[0]?.key ?? ''),
     x: slot.x,
     y: slot.y,
     w: size.w,
@@ -328,7 +345,7 @@ function removeWidget(id: string) {
 }
 
 function onTypeChange(widget: Widget) {
-  if (widget.type === 'table') {
+  if (widget.type === 'table' || widget.type === 'machine') {
     widget.metricKey = ''
   } else if (!widget.metricKey) {
     widget.metricKey = catalog.metrics[0]?.key ?? ''
@@ -360,7 +377,7 @@ function validate(): string | null {
   if (!form.widgets.length) return 'Add at least one widget.'
   for (const w of form.widgets) {
     if (!w.title.trim()) return 'Every widget needs a title.'
-    if (w.type !== 'table' && !w.metricKey) return `Widget "${w.title}" needs a metric.`
+    if (w.type !== 'table' && w.type !== 'machine' && !w.metricKey) return `Widget "${w.title}" needs a metric.`
     if (w.x + w.w > 100 || w.y + w.h > 100) return `Widget "${w.title}" extends outside the canvas.`
   }
   return null
@@ -603,13 +620,20 @@ async function save() {
                 </select>
               </div>
               <div class="mb-2">
+                <label class="form-label form-label-sm text-muted mb-1">Filter by machine type</label>
+                <select v-model="metricTypeFilter" class="form-select form-select-sm" :disabled="selectedWidget.type === 'table' || selectedWidget.type === 'machine'">
+                  <option value="">All types</option>
+                  <option v-for="t in availableMetricTypes" :key="t" :value="t">{{ t }}</option>
+                </select>
+              </div>
+              <div class="mb-2">
                 <label class="form-label form-label-sm text-muted mb-1">Metric</label>
                 <select
                   v-model="selectedWidget.metricKey"
                   class="form-select form-select-sm"
-                  :disabled="selectedWidget.type === 'table'"
+                  :disabled="selectedWidget.type === 'table' || selectedWidget.type === 'machine'"
                 >
-                  <option v-for="m in catalog.metrics" :key="m.key" :value="m.key">
+                  <option v-for="m in filteredMetrics" :key="m.key" :value="m.key">
                     {{ m.label }}{{ m.unit ? ` (${m.unit})` : '' }}
                   </option>
                 </select>

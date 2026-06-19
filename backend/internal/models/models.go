@@ -20,11 +20,12 @@ type Machine struct {
 
 // MetricDef describes a telemetry metric that widgets can be bound to.
 type MetricDef struct {
-	Key   string  `json:"key"`
-	Label string  `json:"label"`
-	Unit  string  `json:"unit"`
-	Min   float64 `json:"min"`
-	Max   float64 `json:"max"`
+	Key   string   `json:"key"`
+	Label string   `json:"label"`
+	Unit  string   `json:"unit"`
+	Min   float64  `json:"min"`
+	Max   float64  `json:"max"`
+	Types []string `json:"types,omitempty"` // empty = universal (all machine types)
 }
 
 // WidgetElement positions a single sub-element within a widget as percentages of the widget's own area.

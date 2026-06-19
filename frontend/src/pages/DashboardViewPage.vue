@@ -84,7 +84,7 @@ watch(
           class="dashboard-canvas-item"
           :style="{ left: `${w.x}%`, top: `${w.y}%`, width: `${w.w}%`, height: `${w.h}%` }"
         >
-          <WidgetRenderer :widget="w" :readings="reading" :history="history" />
+          <WidgetRenderer :widget="w" :readings="reading" :history="history" :machine="currentMachine" />
         </div>
       </div>
 

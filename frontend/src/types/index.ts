@@ -18,9 +18,10 @@ export interface MetricDef {
   unit: string
   min: number
   max: number
+  types?: string[] // undefined or empty = universal
 }
 
-export type WidgetType = 'gauge' | 'line' | 'bar' | 'kpi' | 'status' | 'table'
+export type WidgetType = 'gauge' | 'line' | 'bar' | 'kpi' | 'status' | 'table' | 'machine'
 
 // Position and size of a sub-element within a widget, as percentages (0-100) of the widget's own area.
 export interface WidgetElement {
@@ -83,4 +84,9 @@ export interface TelemetryReading {
   machineId: string
   timestamp: string
   readings: Record<string, number | string>
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
 }

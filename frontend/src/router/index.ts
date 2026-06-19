@@ -36,6 +36,11 @@ const router = createRouter({
       component: () => import('@/pages/CreateDashboardPage.vue'),
     },
     {
+      path: '/explore',
+      name: 'explore',
+      component: () => import('@/pages/ExplorePage.vue'),
+    },
+    {
       path: '/dashboards/:id',
       name: 'dashboard-view',
       component: () => import('@/pages/DashboardViewPage.vue'),

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type {
+  ChatMessage,
   Dashboard,
   Factory,
   Machine,
@@ -43,6 +44,10 @@ export const api = {
   // Telemetry
   getTelemetry: (machineId: string) =>
     http.get<TelemetryReading>(`/machines/${machineId}/telemetry`).then((r) => r.data),
+
+  // Chat
+  chat: (messages: ChatMessage[], context: string) =>
+    http.post<{ reply: string }>('/chat', { messages, context }).then((r) => r.data),
 }
 
 export function apiErrorMessage(err: unknown, fallback = 'Something went wrong'): string {

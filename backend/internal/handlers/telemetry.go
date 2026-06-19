@@ -30,8 +30,8 @@ func NewTelemetryHandler(db *sql.DB) *TelemetryHandler {
 func (h *TelemetryHandler) Get(w http.ResponseWriter, r *http.Request) {
 	machineID := chi.URLParam(r, "id")
 
-	var status string
-	err := h.DB.QueryRow(`SELECT status FROM machines WHERE id = ?`, machineID).Scan(&status)
+	var status, machineType string
+	err := h.DB.QueryRow(`SELECT status, type FROM machines WHERE id = ?`, machineID).Scan(&status, &machineType)
 	if errors.Is(err, sql.ErrNoRows) {
 		writeError(w, http.StatusNotFound, "machine not found")
 		return
@@ -43,7 +43,7 @@ func (h *TelemetryHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now()
 	readings := map[string]any{}
-	for _, m := range models.Metrics {
+	for _, m := range models.MetricsForType(machineType) {
 		switch m.Key {
 		case "status":
 			readings[m.Key] = status

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Widget } from '@/types'
+import type { Machine, Widget } from '@/types'
 import type { HistoryPoint } from '@/composables/useTelemetry'
 import { useCatalogStore } from '@/stores/catalog.store'
 import BarChartWidget from './BarChartWidget.vue'
 import GaugeWidget from './GaugeWidget.vue'
 import KpiWidget from './KpiWidget.vue'
 import LineChartWidget from './LineChartWidget.vue'
+import MachineWidget from './MachineWidget.vue'
 import StatusWidget from './StatusWidget.vue'
 import TableWidget from './TableWidget.vue'
 
@@ -14,6 +15,7 @@ const props = defineProps<{
   widget: Widget
   readings: Record<string, number | string> | null
   history: Record<string, HistoryPoint[]>
+  machine?: Machine | null
 }>()
 
 const catalog = useCatalogStore()
@@ -54,6 +56,12 @@ const widgetHistory = computed(() => props.history[props.widget.metricKey] ?? []
     :title="widget.title"
     :history="widgetHistory"
     :unit="metric?.unit"
+    :elements="widget.elements"
+  />
+  <MachineWidget
+    v-else-if="widget.type === 'machine'"
+    :title="widget.title"
+    :machine="machine ?? null"
     :elements="widget.elements"
   />
   <TableWidget v-else :title="widget.title" :readings="readings" :elements="widget.elements" />

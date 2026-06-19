@@ -1,14 +1,21 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { WidgetElement } from '@/types'
 import { useCatalogStore } from '@/stores/catalog.store'
 
-defineProps<{
+const props = defineProps<{
   title: string
   readings: Record<string, number | string> | null
   elements?: WidgetElement[]
 }>()
 
 const catalog = useCatalogStore()
+
+// Only show metrics present in the current readings snapshot — naturally
+// adapts to the machine type without needing an explicit type prop.
+const activeMetrics = computed(() =>
+  catalog.metrics.filter((m) => props.readings != null && m.key in props.readings),
+)
 
 function formatValue(key: string, value: number | string | undefined): string {
   if (value === undefined) return '—'
@@ -40,7 +47,7 @@ function formatValue(key: string, value: number | string | undefined): string {
                 <div v-if="!readings" class="db-waiting small p-2">Waiting for data…</div>
                 <table v-else class="table table-sm mb-0 widget-table db-table">
                   <tbody>
-                    <tr v-for="metric in catalog.metrics" :key="metric.key">
+                    <tr v-for="metric in activeMetrics" :key="metric.key">
                       <td class="db-td-label">{{ metric.label }}</td>
                       <td class="text-end fw-semibold db-td-value">{{ formatValue(metric.key, readings[metric.key]) }}</td>
                     </tr>
@@ -56,7 +63,7 @@ function formatValue(key: string, value: number | string | undefined): string {
         <div v-if="!readings" class="db-waiting small">Waiting for data…</div>
         <table v-else class="table table-sm mb-0 widget-table db-table">
           <tbody>
-            <tr v-for="metric in catalog.metrics" :key="metric.key">
+            <tr v-for="metric in activeMetrics" :key="metric.key">
               <td class="db-td-label">{{ metric.label }}</td>
               <td class="text-end fw-semibold db-td-value">{{ formatValue(metric.key, readings[metric.key]) }}</td>
             </tr>

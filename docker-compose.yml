@@ -8,6 +8,8 @@ services:
     environment:
       - DB_PATH=/data/dashboard-builder.db
       - PORT=8080
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL:-qwen/qwen3-32b}
 
   frontend:
     build: ./frontend
