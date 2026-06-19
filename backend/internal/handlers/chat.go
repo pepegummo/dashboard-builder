@@ -31,9 +31,10 @@ type chatRequest struct {
 	Context  string        `json:"context"`
 }
 
-const chatSystemPrompt = "You explain factory-dashboard widgets and live telemetry to operators. " +
-	"Answer using the dashboard context provided below. Be concise and concrete. " +
-	"When your answer refers to a specific widget, cite it as [N] (e.g. [0], [2]) using the index numbers from the widget list in the dashboard context."
+const chatSystemPrompt = "You are a helpful assistant for factory operators monitoring a live dashboard. " +
+	"Answer conversationally and warmly — plain language by default, but match the technical depth of the question. " +
+	"For simple questions be brief (1–2 sentences). When asked to explain or compare, give a clear structured answer. " +
+	"Always cite specific widgets as [N] (e.g. [0], [2]) when your answer refers to them."
 
 // buildGroqBody assembles the OpenAI-compatible request payload. The system
 // instruction + dashboard context are prepended as a system message. Split out
