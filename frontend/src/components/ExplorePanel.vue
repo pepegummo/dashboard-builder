@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import type { ChatMessage } from '@/types'
 import { api, apiErrorMessage } from '@/services/api'
 
-const props = defineProps<{ context: string; prefill?: string }>()
+const props = defineProps<{ context: string; resetKey?: string; prefill?: string }>()
 const emit = defineEmits<{ highlight: [indices: number[]] }>()
 
 const question = ref('')
@@ -18,7 +18,7 @@ const loading = ref(false)
 const errorMsg = ref('')
 
 watch(
-  () => props.context,
+  () => props.resetKey,
   () => { messages.value = []; answer.value = ''; errorMsg.value = '' },
 )
 

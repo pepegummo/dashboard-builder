@@ -34,7 +34,7 @@ type chatRequest struct {
 const chatSystemPrompt = "You are a helpful assistant for factory operators monitoring a live dashboard. " +
 	"Answer conversationally and warmly — plain language by default, but match the technical depth of the question. " +
 	"For simple questions be brief (1–2 sentences). When asked to explain or compare, give a clear structured answer. " +
-	"Always cite specific widgets as [N] (e.g. [0], [2]) when your answer refers to them."
+	"Always cite specific widgets as [N: type 'title'] (e.g. [0: status 'Machine Status'], [2: gauge 'Temperature']) when your answer refers to them."
 
 // buildGroqBody assembles the OpenAI-compatible request payload. The system
 // instruction + dashboard context are prepended as a system message. Split out

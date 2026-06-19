@@ -89,9 +89,16 @@ function buildContext(): string {
   widgets.value.forEach((w, i) => {
     const m = catalog.metrics.find((x) => x.key === w.metricKey)
     const r = reading.value?.[w.metricKey]
-    const live = r !== undefined ? `, live: ${r}${m?.unit ? ' ' + m.unit : ''}` : ''
-    const range = m ? `, range ${m.min}–${m.max}${m.unit ? ' ' + m.unit : ''}` : ''
-    lines.push(`[${i}] ${w.type} "${w.title}"${range}${live}`)
+    const unit = m?.unit ? ' ' + m.unit : ''
+    const range = m ? `, range ${m.min}–${m.max}${unit}` : ''
+    let dataStr = ''
+    if (w.type === 'line') {
+      const pts = history.value?.[w.metricKey]
+      dataStr = pts?.length ? `, recent (${pts.length} pts): ${pts.map(p => p.v).join(', ')}${unit}` : ''
+    } else {
+      dataStr = r !== undefined ? `, live: ${r}${unit}` : ''
+    }
+    lines.push(`[${i}] ${w.type} "${w.title}"${range}${dataStr}`)
   })
   return lines.join('\n')
 }
@@ -172,6 +179,7 @@ const exploreContext = computed(() => buildContext())
       <!-- Right: single Q&A panel -->
       <ExplorePanel
         :context="exploreContext"
+        :reset-key="selectedId + ':' + activePage"
         :prefill="prefillQuestion"
         @highlight="highlightedWidgets = $event"
       />
