@@ -104,11 +104,6 @@ watch(
 </template>
 
 <style scoped>
-/* Dark shell so the area around the canvas never flashes white.
-   min-height: 100vh ensures full viewport fill even on short canvases
-   (body is light-grey by default). padding-bottom gives breathing room
-   for the page-dots row; sides and top are zero because the outer
-   page-content-standalone already adds 0.5rem on all edges. */
 .db-view-shell {
   color-scheme: dark;
   background-color: var(--db-bg);

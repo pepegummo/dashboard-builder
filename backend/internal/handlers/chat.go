@@ -32,7 +32,8 @@ type chatRequest struct {
 }
 
 const chatSystemPrompt = "You explain factory-dashboard widgets and live telemetry to operators. " +
-	"Answer using the dashboard context provided below. Be concise and concrete."
+	"Answer using the dashboard context provided below. Be concise and concrete. " +
+	"When your answer refers to a specific widget, cite it as [N] (e.g. [0], [2]) using the index numbers from the widget list in the dashboard context."
 
 // buildGroqBody assembles the OpenAI-compatible request payload. The system
 // instruction + dashboard context are prepended as a system message. Split out

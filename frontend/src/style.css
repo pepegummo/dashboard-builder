@@ -503,3 +503,11 @@ body {
   background-color: var(--db-accent);
   box-shadow: 0 0 8px var(--db-accent);
 }
+
+.dashboard-canvas-item.highlighted {
+  outline: 2px solid var(--db-accent);
+  box-shadow: 0 0 14px var(--db-accent);
+  z-index: 5;
+  border-radius: 0.25rem;
+  transition: outline 0.2s, box-shadow 0.2s;
+}
